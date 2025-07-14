@@ -1,0 +1,556 @@
+import { useState, useEffect } from 'react'
+import './App.css'
+
+// Component demonstrating Props
+function Welcome({ name, age }) {
+  return (
+    <div className="welcome-card">
+      <h3>Welcome, {name}!</h3>
+      <p>Age: {age}</p>
+    </div>
+  )
+}
+
+// Component demonstrating Lists & Keys
+function TaskList({ tasks, onToggle, onDelete }) {
+  return (
+    <div className="task-list">
+      <h3>Task List</h3>
+      {tasks.length === 0 ? (
+        <p>No tasks yet!</p>
+      ) : (
+        <ul>
+          {tasks.map(task => (
+            <li key={task.id} className={task.completed ? 'completed' : ''}>
+              <span onClick={() => onToggle(task.id)}>{task.text}</span>
+              <button onClick={() => onDelete(task.id)}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// Component demonstrating Forms & Controlled Components
+function AddTaskForm({ onAddTask }) {
+  const [taskText, setTaskText] = useState('')
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (taskText.trim()) {
+      onAddTask(taskText.trim())
+      setTaskText('')
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="add-task-form">
+      <input
+        type="text"
+        value={taskText}
+        onChange={(e) => setTaskText(e.target.value)}
+        placeholder="Enter a new task"
+      />
+      <button type="submit">Add Task</button>
+    </form>
+  )
+}
+
+// Component demonstrating API Calls & Data Fetching
+function ApiDemo() {
+  const [users, setUsers] = useState([])
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [activeTab, setActiveTab] = useState('users')
+
+  // Fetch users from JSONPlaceholder API
+  const fetchUsers = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/users')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      setUsers(data.slice(0, 5)) // Only show first 5 users
+    } catch (err) {
+      setError(`Failed to fetch users: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Fetch posts from JSONPlaceholder API
+  const fetchPosts = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('https://jsonplaceholder.typicode.com/posts')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      setPosts(data.slice(0, 5)) // Only show first 5 posts
+    } catch (err) {
+      setError(`Failed to fetch posts: ${err.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Auto-fetch users when component mounts
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
+  // Handle tab switching
+  const handleTabSwitch = (tab) => {
+    setActiveTab(tab)
+    if (tab === 'users' && users.length === 0) {
+      fetchUsers()
+    } else if (tab === 'posts' && posts.length === 0) {
+      fetchPosts()
+    }
+  }
+
+  return (
+    <div className="api-demo">
+      <h3>API Data Fetching</h3>
+      
+      {/* Tab Navigation */}
+      <div className="api-tabs">
+        <button 
+          className={`api-tab ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => handleTabSwitch('users')}
+        >
+          👥 Users
+        </button>
+        <button 
+          className={`api-tab ${activeTab === 'posts' ? 'active' : ''}`}
+          onClick={() => handleTabSwitch('posts')}
+        >
+          📝 Posts
+        </button>
+      </div>
+
+      {/* Refresh Button */}
+      <div className="api-controls">
+        <button 
+          onClick={activeTab === 'users' ? fetchUsers : fetchPosts}
+          disabled={loading}
+          className="refresh-btn"
+        >
+          {loading ? '🔄 Loading...' : '🔄 Refresh Data'}
+        </button>
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className="api-error">
+          ❌ {error}
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="api-loading">
+          <div className="spinner"></div>
+          <p>Fetching {activeTab}...</p>
+        </div>
+      )}
+
+      {/* Data Display */}
+      {!loading && !error && (
+        <div className="api-content">
+          {activeTab === 'users' && (
+            <div className="users-list">
+              {users.map(user => (
+                <div key={user.id} className="user-card">
+                  <h4>{user.name}</h4>
+                  <p>📧 {user.email}</p>
+                  <p>🏢 {user.company.name}</p>
+                  <p>🌐 {user.website}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'posts' && (
+            <div className="posts-list">
+              {posts.map(post => (
+                <div key={post.id} className="post-card">
+                  <h4>{post.title}</h4>
+                  <p>{post.body}</p>
+                  <small>User ID: {post.userId}</small>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* API Info */}
+      <div className="api-info">
+        <small>
+          📡 Data fetched from{' '}
+          <a 
+            href="https://jsonplaceholder.typicode.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            JSONPlaceholder API
+          </a>
+        </small>
+      </div>
+    </div>
+  )
+}
+
+// Palmer Trucks Homepage Recreation Component
+function PalmerTrucksHomepage() {
+  const truckCategories = [
+    { name: 'SLEEPER TRUCKS', icon: '🚛' },
+    { name: 'DAY CABS', icon: '🚚' },
+    { name: 'CAB & CHASSIS', icon: '🔧' },
+    { name: 'DUMP TRUCKS', icon: '🚛' },
+    { name: 'BOX TRUCKS', icon: '📦' },
+    { name: 'MUNICIPAL TRUCKS', icon: '🏢' },
+    { name: 'FLATBEDS', icon: '📐' },
+    { name: 'ROLL-OFF & HOOKLIFT', icon: '🏗️' }
+  ]
+
+  const services = [
+    { title: 'PARTS DEPARTMENT', desc: 'Quality parts to keep you moving', icon: '🔧' },
+    { title: 'SERVICE DEPARTMENT', desc: 'Expert maintenance and repairs', icon: '⚙️' },
+    { title: 'BODY SHOP', desc: 'Professional collision repair', icon: '🎨' },
+    { title: 'WORK TRUCKS', desc: 'Specialized truck solutions', icon: '🚚' },
+    { title: 'RENTAL & LEASING', desc: 'Flexible rental options', icon: '📋' },
+    { title: 'FINANCING', desc: 'Competitive financing solutions', icon: '💰' }
+  ]
+
+  const locations = [
+    { state: 'ILLINOIS', cities: ['Illinois', 'Kenworth of Effingham'] },
+    { state: 'INDIANA', cities: ['Indiana', 'Kenworth of Fort Wayne', 'Kenworth of Indianapolis', 'Kenworth of Evansville'] },
+    { state: 'KENTUCKY', cities: ['Kentucky', 'Kenworth of Louisville', 'Kenworth of Bowling Green'] },
+    { state: 'OHIO', cities: ['Ohio', 'Kenworth of Dayton', 'Kenworth of Cincinnati'] }
+  ]
+
+  const blogPosts = [
+    { title: 'Celebrating the career of Palmer Trucks CFO Jeff Curry', excerpt: 'Palmer Trucks is celebrating the 40-year tenure and retirement of Jeff Curry...' },
+    { title: 'Celebrating 40 years of Palmer Trucks leader John Nichols', excerpt: 'To know John Nichols is to experience the quintessential definition of a kind...' },
+    { title: 'Easy spring truck maintenance tips', excerpt: 'Learn recommended spring maintenance tips to keep your truck in excellent condition...' }
+  ]
+
+  return (
+    <div className="palmer-homepage">
+      {/* Hero Section */}
+      <section className="palmer-hero">
+        <div className="palmer-hero-content">
+          <h1>On the road since 1965</h1>
+          <p className="palmer-tagline">FAMILY OWNED and OPERATED</p>
+          <div className="palmer-hero-buttons">
+            <button className="palmer-btn-primary">SHOP TRUCKS</button>
+            <button className="palmer-btn-secondary">VIEW LOCATIONS</button>
+          </div>
+        </div>
+        <div className="palmer-hero-image">
+          🚛
+        </div>
+      </section>
+
+      {/* Truck Categories */}
+      <section className="palmer-section">
+        <h2>Shop Trucks by Category</h2>
+        <div className="palmer-truck-grid">
+          {truckCategories.map((category, index) => (
+            <div key={index} className="palmer-truck-card">
+              <div className="palmer-truck-icon">{category.icon}</div>
+              <h3>{category.name}</h3>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Services */}
+      <section className="palmer-section palmer-services">
+        <h2>Everything you need to keep your fleet moving forward.</h2>
+        <div className="palmer-services-grid">
+          {services.map((service, index) => (
+            <div key={index} className="palmer-service-card">
+              <div className="palmer-service-icon">{service.icon}</div>
+              <h3>{service.title}</h3>
+              <p>{service.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Locations */}
+      <section className="palmer-section">
+        <h2>FIND YOUR NEAREST LOCATION</h2>
+        <div className="palmer-locations-grid">
+          {locations.map((location, index) => (
+            <div key={index} className="palmer-location-card">
+              <h3>{location.state}</h3>
+              <ul>
+                {location.cities.slice(0, 3).map((city, cityIndex) => (
+                  <li key={cityIndex}>{city}</li>
+                ))}
+              </ul>
+              <button className="palmer-location-btn">View All Locations</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Company Story */}
+      <section className="palmer-section palmer-story">
+        <div className="palmer-story-content">
+          <h2>Experience the Palmer difference.</h2>
+          <p>
+            In 1965, Eldon Palmer, a home-grown Hoosier, started a heavy-duty truck 
+            dealership in Indianapolis. A gentle and humble yet determined man, Eldon had a knack 
+            for making everyone he met feel special and appreciated. Today, we span four 
+            states and employ more than 700 people, going the extra mile to support thousands of 
+            trucks moving our nation's most precious goods to where they need to go - 24 
+            hours a day, seven days a week.
+          </p>
+          <div className="palmer-story-buttons">
+            <button className="palmer-btn-primary">View Open Positions →</button>
+            <button className="palmer-btn-secondary">Learn More About Who we are →</button>
+          </div>
+        </div>
+        <div className="palmer-story-stats">
+          <div className="palmer-stat">
+            <h3>60+</h3>
+            <p>Years in Business</p>
+          </div>
+          <div className="palmer-stat">
+            <h3>700+</h3>
+            <p>Employees</p>
+          </div>
+          <div className="palmer-stat">
+            <h3>4</h3>
+            <p>States Served</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section className="palmer-section">
+        <h2>ON THE ROAD BLOG</h2>
+        <div className="palmer-blog-grid">
+          {blogPosts.map((post, index) => (
+            <div key={index} className="palmer-blog-card">
+              <h3>{post.title}</h3>
+              <p>{post.excerpt}</p>
+              <button className="palmer-read-more">READ MORE →</button>
+            </div>
+          ))}
+        </div>
+        <button className="palmer-btn-secondary">VIEW ALL POSTS →</button>
+      </section>
+
+      {/* Footer CTA */}
+      <section className="palmer-footer-cta">
+        <h2>FREE TIPS, SPECIALS, AND OFFERS</h2>
+        <div className="palmer-newsletter">
+          <input type="email" placeholder="Enter your email address" />
+          <button className="palmer-btn-primary">SUBSCRIBE</button>
+        </div>
+        <div className="palmer-footer-links">
+          <div className="palmer-footer-column">
+            <h4>LOCATIONS</h4>
+            <p>Kenworth of Indianapolis</p>
+            <p>Kenworth of Fort Wayne</p>
+            <p>Kenworth of Louisville</p>
+          </div>
+          <div className="palmer-footer-column">
+            <h4>SERVICES</h4>
+            <p>New Inventory</p>
+            <p>Used Inventory</p>
+            <p>Parts & Service</p>
+          </div>
+          <div className="palmer-footer-column">
+            <h4>COMPANY</h4>
+            <p>Who We Are</p>
+            <p>Careers</p>
+            <p>Contact Us</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+// Main App Component
+function App() {
+  // State Management with useState
+  const [count, setCount] = useState(0)
+  const [user, setUser] = useState({ name: 'John Doe', age: 25 })
+  const [tasks, setTasks] = useState([
+    { id: 1, text: 'Learn React basics', completed: false },
+    { id: 2, text: 'Practice useState', completed: true },
+    { id: 3, text: 'Master useEffect', completed: false }
+  ])
+  const [theme, setTheme] = useState('light')
+  const [activeMainTab, setActiveMainTab] = useState('playground')
+
+  // useEffect Hook - runs after component mounts and when dependencies change
+  useEffect(() => {
+    document.title = `React Playground - Count: ${count}`
+  }, [count])
+
+  useEffect(() => {
+    console.log('Theme changed to:', theme)
+    document.body.className = theme
+  }, [theme])
+
+  // Event Handlers
+  const handleIncrement = () => setCount(count + 1)
+  const handleDecrement = () => setCount(count - 1)
+  const handleReset = () => setCount(0)
+
+  const handleUserUpdate = () => {
+    setUser(prev => ({
+      ...prev,
+      age: prev.age + 1
+    }))
+  }
+
+  const addTask = (taskText) => {
+    const newTask = {
+      id: Date.now(),
+      text: taskText,
+      completed: false
+    }
+    setTasks(prev => [...prev, newTask])
+  }
+
+  const toggleTask = (taskId) => {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      )
+    )
+  }
+
+  const deleteTask = (taskId) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId))
+  }
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light')
+  }
+
+  return (
+    <div className={`app ${theme}`}>
+      <header className="app-header">
+        <h1>🚀 React Fundamentals Playground</h1>
+        <div className="header-links">
+          <a 
+            href="https://www.palmertrucks.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="palmer-link"
+          >
+            🚛 Palmer Trucks
+          </a>
+          <button onClick={toggleTheme} className="theme-toggle">
+            Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
+          </button>
+        </div>
+        
+        {/* Main Tab Navigation */}
+        <div className="main-tabs">
+          <button 
+            className={`main-tab ${activeMainTab === 'playground' ? 'active' : ''}`}
+            onClick={() => setActiveMainTab('playground')}
+          >
+            📚 React Playground
+          </button>
+          <button 
+            className={`main-tab ${activeMainTab === 'palmer' ? 'active' : ''}`}
+            onClick={() => setActiveMainTab('palmer')}
+          >
+            🚛 Palmer Trucks Homepage
+          </button>
+        </div>
+      </header>
+
+      <main className="app-main">
+        {activeMainTab === 'playground' && (
+          <>
+            {/* 1. State Management & Event Handling */}
+            <section className="section">
+              <h2>1. State Management & Event Handling</h2>
+              <div className="counter">
+                <h3>Counter: {count}</h3>
+                <div className="counter-buttons">
+                  <button onClick={handleDecrement}>-</button>
+                  <button onClick={handleReset}>Reset</button>
+                  <button onClick={handleIncrement}>+</button>
+                </div>
+              </div>
+            </section>
+
+            {/* 2. Props */}
+            <section className="section">
+              <h2>2. Props</h2>
+              <Welcome name={user.name} age={user.age} />
+              <button onClick={handleUserUpdate}>Happy Birthday! 🎉</button>
+            </section>
+
+            {/* 3. Conditional Rendering */}
+            <section className="section">
+              <h2>3. Conditional Rendering</h2>
+              <div className="conditional-demo">
+                {count === 0 ? (
+                  <p>🎯 Counter is at zero!</p>
+                ) : count > 0 ? (
+                  <p>✅ Counter is positive: {count}</p>
+                ) : (
+                  <p>❌ Counter is negative: {count}</p>
+                )}
+              </div>
+            </section>
+
+            {/* 4. Lists, Keys & Forms */}
+            <section className="section">
+              <h2>4. Lists, Keys & Forms</h2>
+              <AddTaskForm onAddTask={addTask} />
+              <TaskList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} />
+            </section>
+
+            {/* 5. API Calls & Data Fetching */}
+            <section className="section">
+              <h2>5. API Calls & Data Fetching</h2>
+              <ApiDemo />
+            </section>
+
+            {/* 6. Summary */}
+            <section className="section">
+              <h2>6. Summary</h2>
+              <div className="summary">
+                <p>🔢 Current count: <strong>{count}</strong></p>
+                <p>👤 User: <strong>{user.name}</strong> (Age: {user.age})</p>
+                <p>📝 Total tasks: <strong>{tasks.length}</strong></p>
+                <p>✅ Completed: <strong>{tasks.filter(t => t.completed).length}</strong></p>
+                <p>🎨 Theme: <strong>{theme}</strong></p>
+              </div>
+            </section>
+          </>
+        )}
+
+        {activeMainTab === 'palmer' && (
+          <PalmerTrucksHomepage />
+        )}
+      </main>
+    </div>
+  )
+}
+
+export default App
