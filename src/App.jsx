@@ -1,216 +1,8 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-// Component demonstrating Props
-function Welcome({ name, age }) {
-  return (
-    <div className="welcome-card">
-      <h3>Welcome, {name}!</h3>
-      <p>Age: {age}</p>
-    </div>
-  )
-}
-
-// Component demonstrating Lists & Keys
-function TaskList({ tasks, onToggle, onDelete }) {
-  return (
-    <div className="task-list">
-      <h3>Task List</h3>
-      {tasks.length === 0 ? (
-        <p>No tasks yet!</p>
-      ) : (
-        <ul>
-          {tasks.map(task => (
-            <li key={task.id} className={task.completed ? 'completed' : ''}>
-              <span onClick={() => onToggle(task.id)}>{task.text}</span>
-              <button onClick={() => onDelete(task.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  )
-}
-
-// Component demonstrating Forms & Controlled Components
-function AddTaskForm({ onAddTask }) {
-  const [taskText, setTaskText] = useState('')
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (taskText.trim()) {
-      onAddTask(taskText.trim())
-      setTaskText('')
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="add-task-form">
-      <input
-        type="text"
-        value={taskText}
-        onChange={(e) => setTaskText(e.target.value)}
-        placeholder="Enter a new task"
-      />
-      <button type="submit">Add Task</button>
-    </form>
-  )
-}
-
-// Component demonstrating API Calls & Data Fetching
-function ApiDemo() {
-  const [users, setUsers] = useState([])
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [activeTab, setActiveTab] = useState('users')
-
-  // Fetch users from JSONPlaceholder API
-  const fetchUsers = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await fetch('https://jsonplaceholder.typicode.com/users')
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      const data = await response.json()
-      setUsers(data.slice(0, 5)) // Only show first 5 users
-    } catch (err) {
-      setError(`Failed to fetch users: ${err.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Fetch posts from JSONPlaceholder API
-  const fetchPosts = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await fetch('https://jsonplaceholder.typicode.com/posts')
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      const data = await response.json()
-      setPosts(data.slice(0, 5)) // Only show first 5 posts
-    } catch (err) {
-      setError(`Failed to fetch posts: ${err.message}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Auto-fetch users when component mounts
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  // Handle tab switching
-  const handleTabSwitch = (tab) => {
-    setActiveTab(tab)
-    if (tab === 'users' && users.length === 0) {
-      fetchUsers()
-    } else if (tab === 'posts' && posts.length === 0) {
-      fetchPosts()
-    }
-  }
-
-  return (
-    <div className="api-demo">
-      <h3>API Data Fetching</h3>
-      
-      {/* Tab Navigation */}
-      <div className="api-tabs">
-        <button 
-          className={`api-tab ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => handleTabSwitch('users')}
-        >
-          👥 Users
-        </button>
-        <button 
-          className={`api-tab ${activeTab === 'posts' ? 'active' : ''}`}
-          onClick={() => handleTabSwitch('posts')}
-        >
-          📝 Posts
-        </button>
-      </div>
-
-      {/* Refresh Button */}
-      <div className="api-controls">
-        <button 
-          onClick={activeTab === 'users' ? fetchUsers : fetchPosts}
-          disabled={loading}
-          className="refresh-btn"
-        >
-          {loading ? '🔄 Loading...' : '🔄 Refresh Data'}
-        </button>
-      </div>
-
-      {/* Error Display */}
-      {error && (
-        <div className="api-error">
-          ❌ {error}
-        </div>
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <div className="api-loading">
-          <div className="spinner"></div>
-          <p>Fetching {activeTab}...</p>
-        </div>
-      )}
-
-      {/* Data Display */}
-      {!loading && !error && (
-        <div className="api-content">
-          {activeTab === 'users' && (
-            <div className="users-list">
-              {users.map(user => (
-                <div key={user.id} className="user-card">
-                  <h4>{user.name}</h4>
-                  <p>📧 {user.email}</p>
-                  <p>🏢 {user.company.name}</p>
-                  <p>🌐 {user.website}</p>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {activeTab === 'posts' && (
-            <div className="posts-list">
-              {posts.map(post => (
-                <div key={post.id} className="post-card">
-                  <h4>{post.title}</h4>
-                  <p>{post.body}</p>
-                  <small>User ID: {post.userId}</small>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* API Info */}
-      <div className="api-info">
-        <small>
-          📡 Data fetched from{' '}
-          <a 
-            href="https://jsonplaceholder.typicode.com/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            JSONPlaceholder API
-          </a>
-        </small>
-      </div>
-    </div>
-  )
-}
-
 // Corporate Warehouse Component
-function CorporateWarehouse() {
+function CorporateWarehouse({ addPartRequest }) {
   const [currentView, setCurrentView] = useState('dashboard') // 'dashboard' or 'branch-orders'
   const [selectedBranch, setSelectedBranch] = useState(null)
   const [partFormData, setPartFormData] = useState({
@@ -288,7 +80,29 @@ function CorporateWarehouse() {
       status: 'Pending'
     }
     setSubmittedRequests(prev => [newRequest, ...prev])
-    alert(`Part request submitted successfully!\nRequest ID: ${newRequest.id}`)
+
+    // Create part request for admin dashboard
+    const adminRequest = {
+      id: `REQ-${Date.now()}`,
+      branchName: 'Corporate', // Since this is a general part request
+      branchId: 'corporate',
+      partNumber: 'N/A', // Part number not specified in general request
+      description: partFormData.partDescription,
+      quantity: parseInt(partFormData.quantity),
+      requestedBy: partFormData.name,
+      requestDate: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD format
+      status: 'pending',
+      urgency: partFormData.urgency,
+      notes: `Contact via ${partFormData.contactMethod}`,
+      from: 'Corporate - Part Request Form'
+    }
+
+    // Add to global part requests if the function is available
+    if (addPartRequest) {
+      addPartRequest(adminRequest)
+    }
+
+    alert(`Part request submitted successfully!\nRequest ID: ${newRequest.id}\nSent to Admin Dashboard for review.`)
     setPartFormData({ 
       name: '', 
       partDescription: '', 
@@ -357,10 +171,31 @@ function CorporateWarehouse() {
       })
     }, 5000)
 
+    // Create part request for admin dashboard
+    const partRequest = {
+      id: `REQ-${Date.now()}`,
+      branchName: selectedBranch.name,
+      branchId: selectedBranch.id,
+      partNumber: newPart.partNumber,
+      description: newPart.description,
+      quantity: newPart.quantity,
+      requestedBy: 'CW User', // In real app, this would be the logged-in user
+      requestDate: new Date().toLocaleDateString('en-CA'), // YYYY-MM-DD format
+      status: 'pending',
+      urgency: 'standard',
+      notes: `Added to ${selectedBranch.name} weekly order`,
+      from: `${selectedBranch.name} - CW Order`
+    }
+
+    // Add to global part requests if the function is available
+    if (addPartRequest) {
+      addPartRequest(partRequest)
+    }
+
     // Reset form and close
     setNewPartData({ partNumber: '', description: '', quantity: '' })
     setShowAddPartForm(false)
-    alert(`Part ${newPart.partNumber} added successfully!`)
+    alert(`Part ${newPart.partNumber} added successfully and sent to Admin Dashboard for approval!`)
   }
 
   const handleNewPartChange = (e) => {
@@ -814,62 +649,423 @@ function PalmerTrucksHomepage() {
   )
 }
 
+// Admin Dashboard Component for Corporate Warehouse Employees
+function AdminDashboard({ partRequests, setPartRequests }) {
+  const [filter, setFilter] = useState('all') // 'all', 'pending', 'approved', 'rejected'
+  const [selectedRequest, setSelectedRequest] = useState(null) // For modal popup
+  
+  // Initialize with sample data if no requests exist
+  useEffect(() => {
+    if (partRequests.length === 0) {
+      const sampleRequests = [
+      {
+        id: 'REQ-001',
+        branchName: 'Indy West',
+        branchId: 'indy-west',
+        partNumber: 'K180-5555',
+        description: 'Heavy Duty Air Filter',
+        quantity: 12,
+        requestedBy: 'Mike Johnson',
+        requestDate: '2025-01-14',
+        status: 'pending',
+        urgency: 'standard',
+        notes: 'Needed for upcoming maintenance schedule',
+        from: 'Indy West - Part Request Form'
+      },
+      {
+        id: 'REQ-002',
+        branchName: 'Indy East',
+        branchId: 'indy-east',
+        partNumber: 'T880-9999',
+        description: 'Brake Disc Assembly',
+        quantity: 6,
+        requestedBy: 'Sarah Davis',
+        requestDate: '2025-01-13',
+        status: 'pending',
+        urgency: 'priority',
+        notes: 'Customer waiting - urgent repair needed',
+        from: 'Indy East - Part Request Form'
+      },
+      {
+        id: 'REQ-003',
+        branchName: 'Louisville',
+        branchId: 'louisville',
+        partNumber: 'W900-4444',
+        description: 'Transmission Cooler',
+        quantity: 3,
+        requestedBy: 'Tom Wilson',
+        requestDate: '2025-01-13',
+        status: 'approved',
+        urgency: 'standard',
+        notes: 'Standard stock replenishment',
+        from: 'Louisville - Part Request Form'
+      },
+      {
+        id: 'REQ-004',
+        branchName: 'Indy West',
+        branchId: 'indy-west',
+        partNumber: 'K180-7777',
+        description: 'LED Headlight Kit',
+        quantity: 8,
+        requestedBy: 'Mike Johnson',
+        requestDate: '2025-01-12',
+        status: 'rejected',
+        urgency: 'standard',
+        notes: 'Cost exceeds budget - alternative part suggested',
+        from: 'Indy West - Part Request Form'
+      },
+      {
+        id: 'REQ-005',
+        branchName: 'Indy East',
+        branchId: 'indy-east',
+        partNumber: 'T680-3333',
+        description: 'Fuel Injector Set',
+        quantity: 4,
+        requestedBy: 'Sarah Davis',
+        requestDate: '2025-01-14',
+        status: 'pending',
+        urgency: 'urgent',
+        notes: 'Critical repair - truck down',
+        from: 'Indy East - Part Request Form'
+      }
+    ]
+    setPartRequests(sampleRequests)
+    }
+  }, [partRequests.length, setPartRequests])
+
+  const handleStatusChange = (requestId, newStatus) => {
+    setPartRequests(prev => 
+      prev.map(request => 
+        request.id === requestId 
+          ? { ...request, status: newStatus }
+          : request
+      )
+    )
+  }
+
+  const getFilteredRequests = () => {
+    if (filter === 'all') return partRequests
+    return partRequests.filter(request => request.status === filter)
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return '#ffc107'
+      case 'approved': return '#28a745'
+      case 'rejected': return '#dc3545'
+      default: return '#6c757d'
+    }
+  }
+
+  const getUrgencyColor = (urgency) => {
+    switch (urgency) {
+      case 'urgent': return '#dc3545'
+      case 'priority': return '#fd7e14'
+      case 'standard': return '#28a745'
+      default: return '#6c757d'
+    }
+  }
+
+  const pendingCount = partRequests.filter(r => r.status === 'pending').length
+  const approvedCount = partRequests.filter(r => r.status === 'approved').length
+  const rejectedCount = partRequests.filter(r => r.status === 'rejected').length
+
+  return (
+    <div className="admin-dashboard">
+      <div className="admin-header">
+        <h1>🏢 Admin Dashboard</h1>
+        <p>Corporate Warehouse - Part Request Management</p>
+      </div>
+
+      {/* Statistics Cards */}
+      <div className="admin-stats">
+        <div className="stat-card pending">
+          <div className="stat-icon">⏳</div>
+          <div className="stat-info">
+            <h3>{pendingCount}</h3>
+            <p>Pending Requests</p>
+          </div>
+        </div>
+        <div className="stat-card approved">
+          <div className="stat-icon">✅</div>
+          <div className="stat-info">
+            <h3>{approvedCount}</h3>
+            <p>Approved</p>
+          </div>
+        </div>
+        <div className="stat-card rejected">
+          <div className="stat-icon">❌</div>
+          <div className="stat-info">
+            <h3>{rejectedCount}</h3>
+            <p>Rejected</p>
+          </div>
+        </div>
+        <div className="stat-card total">
+          <div className="stat-icon">📊</div>
+          <div className="stat-info">
+            <h3>{partRequests.length}</h3>
+            <p>Total Requests</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Controls */}
+      <div className="admin-controls">
+        <div className="filter-section">
+          <label htmlFor="statusFilter">Filter by Status:</label>
+          <select
+            id="statusFilter"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="admin-select"
+          >
+            <option value="all">All Requests</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Requests Table */}
+      <div className="admin-table-container">
+        <h2>Part Requests ({getFilteredRequests().length})</h2>
+        <div className="requests-table-wrapper">
+          <table className="admin-requests-table">
+            <thead>
+              <tr>
+                <th>Branch</th>
+                <th>From</th>
+                <th>Part Number</th>
+                <th>Date</th>
+                <th>Qty</th>
+                <th>Urgency</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {getFilteredRequests().map(request => (
+                <tr 
+                  key={request.id} 
+                  className={`request-row ${request.status}`}
+                  onClick={() => setSelectedRequest(request)}
+                  style={{ cursor: 'pointer' }}
+                  title="Click to view details"
+                >
+                  <td className="branch-col">
+                    <div className="branch-info">
+                      <strong>{request.branchName}</strong>
+                    </div>
+                  </td>
+                  <td className="from-col">
+                    <span className="from-badge">{request.from}</span>
+                  </td>
+                  <td className="part-number-col">
+                    <code>{request.partNumber}</code>
+                  </td>
+                  <td className="date-col">{request.requestDate}</td>
+                  <td className="quantity-col">
+                    <span className="quantity-badge">{request.quantity}</span>
+                  </td>
+                  <td className="urgency-col">
+                    <span 
+                      className="urgency-badge"
+                      style={{ backgroundColor: getUrgencyColor(request.urgency) }}
+                    >
+                      {request.urgency.toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="status-col">
+                    <span 
+                      className="status-badge"
+                      style={{ backgroundColor: getStatusColor(request.status) }}
+                    >
+                      {request.status.toUpperCase()}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {getFilteredRequests().length === 0 && (
+          <div className="no-requests">
+            <p>No requests found matching the current filter.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Request Details Modal */}
+      {selectedRequest && (
+        <div className="modal-overlay" onClick={() => setSelectedRequest(null)}>
+          <div className="request-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Part Request Details</h2>
+              <button 
+                className="modal-close-btn"
+                onClick={() => setSelectedRequest(null)}
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="modal-content">
+              <div className="request-details-grid">
+                <div className="detail-item">
+                  <label>Request ID:</label>
+                  <span className="request-id-display">{selectedRequest.id}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Branch:</label>
+                  <span className="branch-display">{selectedRequest.branchName}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Source:</label>
+                  <span className="from-display">{selectedRequest.from}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Part Number:</label>
+                  <span className="part-number-display">{selectedRequest.partNumber}</span>
+                </div>
+                
+                <div className="detail-item full-width">
+                  <label>Description:</label>
+                  <span className="description-display">{selectedRequest.description}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Quantity:</label>
+                  <span className="quantity-display">{selectedRequest.quantity}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Requested By:</label>
+                  <span className="requester-display">{selectedRequest.requestedBy}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Request Date:</label>
+                  <span className="date-display">{selectedRequest.requestDate}</span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Urgency:</label>
+                  <span 
+                    className="urgency-display"
+                    style={{ 
+                      backgroundColor: getUrgencyColor(selectedRequest.urgency),
+                      color: 'white',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    {selectedRequest.urgency}
+                  </span>
+                </div>
+                
+                <div className="detail-item">
+                  <label>Status:</label>
+                  <span 
+                    className="status-display"
+                    style={{ 
+                      backgroundColor: getStatusColor(selectedRequest.status),
+                      color: 'white',
+                      padding: '0.25rem 0.75rem',
+                      borderRadius: '12px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    {selectedRequest.status}
+                  </span>
+                </div>
+                
+                {selectedRequest.notes && (
+                  <div className="detail-item full-width">
+                    <label>Notes:</label>
+                    <span className="notes-display">{selectedRequest.notes}</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="modal-actions">
+                <h3>Actions</h3>
+                <div className="modal-action-buttons">
+                  {selectedRequest.status === 'pending' && (
+                    <>
+                      <button
+                        className="approve-btn modal-btn"
+                        onClick={() => {
+                          handleStatusChange(selectedRequest.id, 'approved')
+                          setSelectedRequest({ ...selectedRequest, status: 'approved' })
+                        }}
+                      >
+                        ✅ Approve Request
+                      </button>
+                      <button
+                        className="reject-btn modal-btn"
+                        onClick={() => {
+                          handleStatusChange(selectedRequest.id, 'rejected')
+                          setSelectedRequest({ ...selectedRequest, status: 'rejected' })
+                        }}
+                      >
+                        ❌ Reject Request
+                      </button>
+                    </>
+                  )}
+                  {selectedRequest.status !== 'pending' && (
+                    <button
+                      className="reset-btn modal-btn"
+                      onClick={() => {
+                        handleStatusChange(selectedRequest.id, 'pending')
+                        setSelectedRequest({ ...selectedRequest, status: 'pending' })
+                      }}
+                    >
+                      🔄 Reset to Pending
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Main App Component
 function App() {
-  // State Management with useState
-  const [count, setCount] = useState(0)
-  const [user, setUser] = useState({ name: 'John Doe', age: 25 })
-  const [tasks, setTasks] = useState([
-    { id: 1, text: 'Learn React basics', completed: false },
-    { id: 2, text: 'Practice useState', completed: true },
-    { id: 3, text: 'Master useEffect', completed: false }
-  ])
+  // State Management
   const [theme, setTheme] = useState('light')
   const [activeMainTab, setActiveMainTab] = useState('palmer')
+  const [globalPartRequests, setGlobalPartRequests] = useState([])
 
-  // useEffect Hook - runs after component mounts and when dependencies change
+  // Function to add new part request
+  const addPartRequest = (newRequest) => {
+    setGlobalPartRequests(prev => [newRequest, ...prev])
+  }
+
+  // useEffect Hook for theme changes
   useEffect(() => {
-    document.title = `React Playground - Count: ${count}`
-  }, [count])
+    document.title = 'Palmer Trucks Business Portal'
+  }, [])
 
   useEffect(() => {
     console.log('Theme changed to:', theme)
     document.body.className = theme
   }, [theme])
 
-  // Event Handlers
-  const handleIncrement = () => setCount(count + 1)
-  const handleDecrement = () => setCount(count - 1)
-  const handleReset = () => setCount(0)
-
-  const handleUserUpdate = () => {
-    setUser(prev => ({
-      ...prev,
-      age: prev.age + 1
-    }))
-  }
-
-  const addTask = (taskText) => {
-    const newTask = {
-      id: Date.now(),
-      text: taskText,
-      completed: false
-    }
-    setTasks(prev => [...prev, newTask])
-  }
-
-  const toggleTask = (taskId) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      )
-    )
-  }
-
-  const deleteTask = (taskId) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId))
-  }
-
+  // Theme toggle handler
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light')
   }
@@ -877,7 +1073,7 @@ function App() {
   return (
     <div className={`app ${theme}`}>
       <header className="app-header">
-        <h1>🚀 React Fundamentals Playground</h1>
+        <h1>🚛 Palmer Trucks Business Portal</h1>
         <div className="header-links">
           <a 
             href="https://www.palmertrucks.com/" 
@@ -885,7 +1081,7 @@ function App() {
             rel="noopener noreferrer"
             className="palmer-link"
           >
-            🚛 Palmer Trucks
+            🌐 Visit Palmer Trucks
           </a>
           <button onClick={toggleTheme} className="theme-toggle">
             Switch to {theme === 'light' ? 'Dark' : 'Light'} Mode
@@ -895,16 +1091,10 @@ function App() {
         {/* Main Tab Navigation */}
         <div className="main-tabs">
           <button 
-            className={`main-tab ${activeMainTab === 'playground' ? 'active' : ''}`}
-            onClick={() => setActiveMainTab('playground')}
-          >
-            📚 React Playground
-          </button>
-          <button 
             className={`main-tab ${activeMainTab === 'palmer' ? 'active' : ''}`}
             onClick={() => setActiveMainTab('palmer')}
           >
-            🚛 Palmer Trucks Homepage
+            🏠 Palmer Trucks Homepage
           </button>
           <button 
             className={`main-tab ${activeMainTab === 'warehouse' ? 'active' : ''}`}
@@ -912,79 +1102,29 @@ function App() {
           >
             🏭 Corporate Warehouse
           </button>
+          <button 
+            className={`main-tab ${activeMainTab === 'admin' ? 'active' : ''}`}
+            onClick={() => setActiveMainTab('admin')}
+          >
+            🏢 Admin Dashboard
+          </button>
         </div>
       </header>
 
       <main className="app-main">
-        {activeMainTab === 'playground' && (
-          <>
-            {/* 1. State Management & Event Handling */}
-            <section className="section">
-              <h2>1. State Management & Event Handling</h2>
-              <div className="counter">
-                <h3>Counter: {count}</h3>
-                <div className="counter-buttons">
-                  <button onClick={handleDecrement}>-</button>
-                  <button onClick={handleReset}>Reset</button>
-                  <button onClick={handleIncrement}>+</button>
-                </div>
-              </div>
-            </section>
-
-            {/* 2. Props */}
-            <section className="section">
-              <h2>2. Props</h2>
-              <Welcome name={user.name} age={user.age} />
-              <button onClick={handleUserUpdate}>Happy Birthday! 🎉</button>
-            </section>
-
-            {/* 3. Conditional Rendering */}
-            <section className="section">
-              <h2>3. Conditional Rendering</h2>
-              <div className="conditional-demo">
-                {count === 0 ? (
-                  <p>🎯 Counter is at zero!</p>
-                ) : count > 0 ? (
-                  <p>✅ Counter is positive: {count}</p>
-                ) : (
-                  <p>❌ Counter is negative: {count}</p>
-                )}
-              </div>
-            </section>
-
-            {/* 4. Lists, Keys & Forms */}
-            <section className="section">
-              <h2>4. Lists, Keys & Forms</h2>
-              <AddTaskForm onAddTask={addTask} />
-              <TaskList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} />
-            </section>
-
-            {/* 5. API Calls & Data Fetching */}
-            <section className="section">
-              <h2>5. API Calls & Data Fetching</h2>
-              <ApiDemo />
-            </section>
-
-            {/* 6. Summary */}
-            <section className="section">
-              <h2>6. Summary</h2>
-              <div className="summary">
-                <p>🔢 Current count: <strong>{count}</strong></p>
-                <p>👤 User: <strong>{user.name}</strong> (Age: {user.age})</p>
-                <p>📝 Total tasks: <strong>{tasks.length}</strong></p>
-                <p>✅ Completed: <strong>{tasks.filter(t => t.completed).length}</strong></p>
-                <p>🎨 Theme: <strong>{theme}</strong></p>
-              </div>
-            </section>
-          </>
-        )}
-
         {activeMainTab === 'palmer' && (
           <PalmerTrucksHomepage />
         )}
 
         {activeMainTab === 'warehouse' && (
-          <CorporateWarehouse />
+          <CorporateWarehouse addPartRequest={addPartRequest} />
+        )}
+
+        {activeMainTab === 'admin' && (
+          <AdminDashboard 
+            partRequests={globalPartRequests}
+            setPartRequests={setGlobalPartRequests}
+          />
         )}
       </main>
     </div>
