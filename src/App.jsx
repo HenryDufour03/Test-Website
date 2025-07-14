@@ -397,7 +397,7 @@ function App() {
     { id: 3, text: 'Master useEffect', completed: false }
   ])
   const [theme, setTheme] = useState('light')
-  const [activeMainTab, setActiveMainTab] = useState('playground')
+  const [activeMainTab, setActiveMainTab] = useState('palmer')
 
   // useEffect Hook - runs after component mounts and when dependencies change
   useEffect(() => {
