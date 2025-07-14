@@ -209,20 +209,85 @@ function ApiDemo() {
   )
 }
 
-// Palmer Trucks Homepage Recreation Component
-function PalmerTrucksHomepage() {
-  const [showPartForm, setShowPartForm] = useState(false)
+// Corporate Warehouse Component
+function CorporateWarehouse() {
+  const [currentView, setCurrentView] = useState('dashboard') // 'dashboard' or 'branch-orders'
+  const [selectedBranch, setSelectedBranch] = useState(null)
   const [partFormData, setPartFormData] = useState({
     name: '',
     partDescription: '',
-    quantity: ''
+    quantity: '',
+    urgency: 'standard',
+    contactMethod: 'email'
   })
+  const [submittedRequests, setSubmittedRequests] = useState([])
+
+  // Sample branch data with weekly orders
+  const branches = [
+    { 
+      id: 'indy-west',
+      name: 'Indy West',
+      location: 'Indianapolis West',
+      poNumber: 'PO-IW-2025-003',
+      orderDate: '2025-01-14',
+      orders: [
+        { partNumber: 'K180-1234', description: 'Air Filter Element', quantity: 25 },
+        { partNumber: 'K180-5678', description: 'Oil Filter', quantity: 40 },
+        { partNumber: 'K180-9012', description: 'Fuel Filter', quantity: 15 },
+        { partNumber: 'T660-3456', description: 'Brake Pad Set', quantity: 8 },
+        { partNumber: 'T880-7890', description: 'Windshield Wipers', quantity: 12 },
+        { partNumber: 'W900-1122', description: 'Headlight Assembly', quantity: 6 }
+      ]
+    },
+    { 
+      id: 'indy-east',
+      name: 'Indy East',
+      location: 'Indianapolis East',
+      poNumber: 'PO-IE-2025-007',
+      orderDate: '2025-01-14',
+      orders: [
+        { partNumber: 'T680-2468', description: 'Transmission Filter', quantity: 18 },
+        { partNumber: 'T880-1357', description: 'Drive Belt', quantity: 22 },
+        { partNumber: 'K180-2580', description: 'Radiator Hose', quantity: 14 },
+        { partNumber: 'W900-3691', description: 'Mirror Assembly', quantity: 10 },
+        { partNumber: 'T660-4702', description: 'Starter Motor', quantity: 5 },
+        { partNumber: 'K180-5813', description: 'Alternator', quantity: 7 }
+      ]
+    },
+    { 
+      id: 'louisville',
+      name: 'Louisville',
+      location: 'Louisville, KY',
+      poNumber: 'PO-LV-2025-012',
+      orderDate: '2025-01-14',
+      orders: [
+        { partNumber: 'T880-6924', description: 'Shock Absorber', quantity: 16 },
+        { partNumber: 'K180-7035', description: 'Coolant Pump', quantity: 9 },
+        { partNumber: 'W900-8146', description: 'Exhaust Pipe', quantity: 11 },
+        { partNumber: 'T660-9257', description: 'Turbocharger', quantity: 3 },
+        { partNumber: 'T680-0368', description: 'Air Compressor', quantity: 6 },
+        { partNumber: 'K180-1479', description: 'Power Steering Pump', quantity: 8 }
+      ]
+    }
+  ]
 
   const handlePartFormSubmit = (e) => {
     e.preventDefault()
-    alert(`Part request submitted!\nName: ${partFormData.name}\nPart: ${partFormData.partDescription}\nQuantity: ${partFormData.quantity}`)
-    setPartFormData({ name: '', partDescription: '', quantity: '' })
-    setShowPartForm(false)
+    const newRequest = {
+      id: Date.now(),
+      ...partFormData,
+      dateSubmitted: new Date().toLocaleDateString(),
+      status: 'Pending'
+    }
+    setSubmittedRequests(prev => [newRequest, ...prev])
+    alert(`Part request submitted successfully!\nRequest ID: ${newRequest.id}`)
+    setPartFormData({ 
+      name: '', 
+      partDescription: '', 
+      quantity: '', 
+      urgency: 'standard',
+      contactMethod: 'email'
+    })
   }
 
   const handlePartFormChange = (e) => {
@@ -231,6 +296,212 @@ function PalmerTrucksHomepage() {
       [e.target.name]: e.target.value
     }))
   }
+
+  const handleBranchSelect = (branch) => {
+    setSelectedBranch(branch)
+    setCurrentView('branch-orders')
+  }
+
+  const handleBackToDashboard = () => {
+    setCurrentView('dashboard')
+    setSelectedBranch(null)
+  }
+
+  const calculateTotalParts = (orders) => {
+    return orders.reduce((total, order) => total + order.quantity, 0)
+  }
+
+  return (
+    <div className="corporate-warehouse">
+      <div className="warehouse-header">
+        <h1>🏭 Corporate Warehouse</h1>
+        <p>
+          {currentView === 'dashboard' 
+            ? 'Branch order management and part requests'
+            : `${selectedBranch.name} - Weekly Order Details`
+          }
+        </p>
+      </div>
+
+      {currentView === 'dashboard' && (
+        <div className="warehouse-content">
+          {/* Branch Orders Section */}
+          <div className="warehouse-section">
+            <h2>Branch Weekly Orders</h2>
+            <p>Select a branch to view their current weekly parts order:</p>
+            <div className="branches-grid">
+              {branches.map(branch => (
+                <div 
+                  key={branch.id} 
+                  className="branch-card"
+                  onClick={() => handleBranchSelect(branch)}
+                >
+                  <div className="branch-info">
+                    <h3>{branch.name}</h3>
+                    <p className="branch-location">{branch.location}</p>
+                    <p className="branch-po">PO: {branch.poNumber}</p>
+                    <p className="branch-stats">
+                      {branch.orders.length} line items • {calculateTotalParts(branch.orders)} total parts
+                    </p>
+                  </div>
+                  <div className="branch-arrow">→</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Part Request Form Section */}
+          <div className="warehouse-form-section">
+            <h2>Submit New Part Request</h2>
+            <form onSubmit={handlePartFormSubmit} className="warehouse-part-form">
+              <div className="form-row">
+                <div className="palmer-form-group">
+                  <label htmlFor="name">Your Name *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={partFormData.name}
+                    onChange={handlePartFormChange}
+                    required
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div className="palmer-form-group">
+                  <label htmlFor="urgency">Urgency Level *</label>
+                  <select
+                    id="urgency"
+                    name="urgency"
+                    value={partFormData.urgency}
+                    onChange={handlePartFormChange}
+                    required
+                  >
+                    <option value="standard">Standard (5-7 business days)</option>
+                    <option value="priority">Priority (2-3 business days)</option>
+                    <option value="urgent">Urgent (Same day)</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="palmer-form-group">
+                <label htmlFor="partDescription">Part Description *</label>
+                <textarea
+                  id="partDescription"
+                  name="partDescription"
+                  value={partFormData.partDescription}
+                  onChange={handlePartFormChange}
+                  required
+                  placeholder="Describe the part you need (include part number, make, model, year if known)"
+                  rows="4"
+                />
+              </div>
+              
+              <div className="form-row">
+                <div className="palmer-form-group">
+                  <label htmlFor="quantity">Quantity *</label>
+                  <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    value={partFormData.quantity}
+                    onChange={handlePartFormChange}
+                    required
+                    min="1"
+                    placeholder="How many do you need?"
+                  />
+                </div>
+                <div className="palmer-form-group">
+                  <label htmlFor="contactMethod">Preferred Contact Method *</label>
+                  <select
+                    id="contactMethod"
+                    name="contactMethod"
+                    value={partFormData.contactMethod}
+                    onChange={handlePartFormChange}
+                    required
+                  >
+                    <option value="email">Email</option>
+                    <option value="phone">Phone</option>
+                    <option value="text">Text Message</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" className="warehouse-submit-btn">
+                Submit Part Request
+              </button>
+            </form>
+          </div>
+
+          {submittedRequests.length > 0 && (
+            <div className="warehouse-requests-section">
+              <h2>Your Recent Requests</h2>
+              <div className="requests-list">
+                {submittedRequests.slice(0, 5).map(request => (
+                  <div key={request.id} className="request-card">
+                    <div className="request-header">
+                      <span className="request-id">#{request.id}</span>
+                      <span className={`request-status ${request.status.toLowerCase()}`}>
+                        {request.status}
+                      </span>
+                    </div>
+                    <div className="request-details">
+                      <p><strong>Part:</strong> {request.partDescription}</p>
+                      <p><strong>Quantity:</strong> {request.quantity}</p>
+                      <p><strong>Urgency:</strong> {request.urgency}</p>
+                      <p><strong>Date:</strong> {request.dateSubmitted}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {currentView === 'branch-orders' && selectedBranch && (
+        <div className="branch-orders-view">
+          <div className="branch-orders-header">
+            <button className="back-btn" onClick={handleBackToDashboard}>
+              ← Back to Dashboard
+            </button>
+            <div className="order-summary">
+              <h2>{selectedBranch.poNumber}</h2>
+              <div className="order-meta">
+                <span>Order Date: {selectedBranch.orderDate}</span>
+                <span>Total Line Items: {selectedBranch.orders.length}</span>
+                <span>Total Parts: {calculateTotalParts(selectedBranch.orders)}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="parts-table-container">
+            <table className="parts-table">
+              <thead>
+                <tr>
+                  <th>Part Number</th>
+                  <th>Description</th>
+                  <th>Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selectedBranch.orders.map((order, index) => (
+                  <tr key={index}>
+                    <td className="part-number">{order.partNumber}</td>
+                    <td className="part-description">{order.description}</td>
+                    <td className="part-quantity">{order.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Palmer Trucks Homepage Recreation Component
+function PalmerTrucksHomepage() {
 
   const truckCategories = [
     { name: 'SLEEPER TRUCKS', icon: '🚛' },
@@ -308,88 +579,6 @@ function PalmerTrucksHomepage() {
           ))}
         </div>
       </section>
-
-      {/* Part Request Section */}
-      <section className="palmer-section">
-        <h2>Need a Part? We've Got You Covered!</h2>
-        <div className="palmer-part-request">
-          <div className="palmer-part-request-content">
-            <div className="palmer-part-icon">🔧</div>
-            <h3>Request a Part</h3>
-            <p>Can't find the part you need? Submit a request and our parts specialists will help you find exactly what you're looking for.</p>
-            <button 
-              className="palmer-btn-primary"
-              onClick={() => setShowPartForm(true)}
-            >
-              Request Part Now
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Part Request Form Modal */}
-      {showPartForm && (
-        <div className="palmer-modal-overlay" onClick={() => setShowPartForm(false)}>
-          <div className="palmer-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="palmer-modal-header">
-              <h2>Request a Part</h2>
-              <button 
-                className="palmer-modal-close"
-                onClick={() => setShowPartForm(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handlePartFormSubmit} className="palmer-part-form">
-              <div className="palmer-form-group">
-                <label htmlFor="name">Your Name *</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={partFormData.name}
-                  onChange={handlePartFormChange}
-                  required
-                  placeholder="Enter your full name"
-                />
-              </div>
-              <div className="palmer-form-group">
-                <label htmlFor="partDescription">Part Description *</label>
-                <textarea
-                  id="partDescription"
-                  name="partDescription"
-                  value={partFormData.partDescription}
-                  onChange={handlePartFormChange}
-                  required
-                  placeholder="Describe the part you need (include part number if known)"
-                  rows="3"
-                />
-              </div>
-              <div className="palmer-form-group">
-                <label htmlFor="quantity">Quantity *</label>
-                <input
-                  type="number"
-                  id="quantity"
-                  name="quantity"
-                  value={partFormData.quantity}
-                  onChange={handlePartFormChange}
-                  required
-                  min="1"
-                  placeholder="How many do you need?"
-                />
-              </div>
-              <div className="palmer-form-buttons">
-                <button type="button" className="palmer-btn-secondary" onClick={() => setShowPartForm(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="palmer-btn-primary">
-                  Submit Request
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Locations */}
       <section className="palmer-section">
@@ -581,6 +770,12 @@ function App() {
           >
             🚛 Palmer Trucks Homepage
           </button>
+          <button 
+            className={`main-tab ${activeMainTab === 'warehouse' ? 'active' : ''}`}
+            onClick={() => setActiveMainTab('warehouse')}
+          >
+            🏭 Corporate Warehouse
+          </button>
         </div>
       </header>
 
@@ -650,6 +845,10 @@ function App() {
 
         {activeMainTab === 'palmer' && (
           <PalmerTrucksHomepage />
+        )}
+
+        {activeMainTab === 'warehouse' && (
+          <CorporateWarehouse />
         )}
       </main>
     </div>
