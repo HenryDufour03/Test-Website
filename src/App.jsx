@@ -211,6 +211,27 @@ function ApiDemo() {
 
 // Palmer Trucks Homepage Recreation Component
 function PalmerTrucksHomepage() {
+  const [showPartForm, setShowPartForm] = useState(false)
+  const [partFormData, setPartFormData] = useState({
+    name: '',
+    partDescription: '',
+    quantity: ''
+  })
+
+  const handlePartFormSubmit = (e) => {
+    e.preventDefault()
+    alert(`Part request submitted!\nName: ${partFormData.name}\nPart: ${partFormData.partDescription}\nQuantity: ${partFormData.quantity}`)
+    setPartFormData({ name: '', partDescription: '', quantity: '' })
+    setShowPartForm(false)
+  }
+
+  const handlePartFormChange = (e) => {
+    setPartFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
+
   const truckCategories = [
     { name: 'SLEEPER TRUCKS', icon: '🚛' },
     { name: 'DAY CABS', icon: '🚚' },
@@ -287,6 +308,88 @@ function PalmerTrucksHomepage() {
           ))}
         </div>
       </section>
+
+      {/* Part Request Section */}
+      <section className="palmer-section">
+        <h2>Need a Part? We've Got You Covered!</h2>
+        <div className="palmer-part-request">
+          <div className="palmer-part-request-content">
+            <div className="palmer-part-icon">🔧</div>
+            <h3>Request a Part</h3>
+            <p>Can't find the part you need? Submit a request and our parts specialists will help you find exactly what you're looking for.</p>
+            <button 
+              className="palmer-btn-primary"
+              onClick={() => setShowPartForm(true)}
+            >
+              Request Part Now
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Part Request Form Modal */}
+      {showPartForm && (
+        <div className="palmer-modal-overlay" onClick={() => setShowPartForm(false)}>
+          <div className="palmer-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="palmer-modal-header">
+              <h2>Request a Part</h2>
+              <button 
+                className="palmer-modal-close"
+                onClick={() => setShowPartForm(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handlePartFormSubmit} className="palmer-part-form">
+              <div className="palmer-form-group">
+                <label htmlFor="name">Your Name *</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={partFormData.name}
+                  onChange={handlePartFormChange}
+                  required
+                  placeholder="Enter your full name"
+                />
+              </div>
+              <div className="palmer-form-group">
+                <label htmlFor="partDescription">Part Description *</label>
+                <textarea
+                  id="partDescription"
+                  name="partDescription"
+                  value={partFormData.partDescription}
+                  onChange={handlePartFormChange}
+                  required
+                  placeholder="Describe the part you need (include part number if known)"
+                  rows="3"
+                />
+              </div>
+              <div className="palmer-form-group">
+                <label htmlFor="quantity">Quantity *</label>
+                <input
+                  type="number"
+                  id="quantity"
+                  name="quantity"
+                  value={partFormData.quantity}
+                  onChange={handlePartFormChange}
+                  required
+                  min="1"
+                  placeholder="How many do you need?"
+                />
+              </div>
+              <div className="palmer-form-buttons">
+                <button type="button" className="palmer-btn-secondary" onClick={() => setShowPartForm(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="palmer-btn-primary">
+                  Submit Request
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Locations */}
       <section className="palmer-section">

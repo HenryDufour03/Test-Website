@@ -984,6 +984,231 @@ body.dark {
   opacity: 1;
 }
 
+/* Part Request Section */
+.palmer-part-request {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+.palmer-part-request-content h3 {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.palmer-part-request-content p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.palmer-part-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.palmer-part-request .palmer-btn-primary {
+  background: white;
+  color: #ff6b35;
+  border: 2px solid white;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+}
+
+.palmer-part-request .palmer-btn-primary:hover {
+  background: transparent;
+  color: white;
+  border-color: white;
+}
+
+/* Modal Styles */
+.palmer-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.palmer-modal {
+  background: var(--bg-light);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+.dark .palmer-modal {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.palmer-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.dark .palmer-modal-header {
+  border-bottom-color: var(--border-dark);
+}
+
+.palmer-modal-header h2 {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 1.8rem;
+}
+
+.palmer-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.dark .palmer-modal-close {
+  color: var(--text-dark);
+}
+
+.palmer-modal-close:hover {
+  background: var(--border-light);
+  color: var(--primary-color);
+}
+
+.dark .palmer-modal-close:hover {
+  background: var(--border-dark);
+}
+
+/* Form Styles */
+.palmer-part-form {
+  padding: 2rem;
+}
+
+.palmer-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.palmer-form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: var(--text-light);
+}
+
+.dark .palmer-form-group label {
+  color: var(--text-dark);
+}
+
+.palmer-form-group input,
+.palmer-form-group textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: var(--bg-light);
+  color: var(--text-light);
+}
+
+.dark .palmer-form-group input,
+.dark .palmer-form-group textarea {
+  border-color: var(--border-dark);
+  background: var(--card-bg-dark);
+  color: var(--text-dark);
+}
+
+.palmer-form-group input:focus,
+.palmer-form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.1);
+}
+
+.palmer-form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.palmer-form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.palmer-form-buttons .palmer-btn-secondary {
+  background: transparent;
+  color: var(--text-light);
+  border: 2px solid var(--border-light);
+}
+
+.dark .palmer-form-buttons .palmer-btn-secondary {
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.palmer-form-buttons .palmer-btn-secondary:hover {
+  background: var(--border-light);
+}
+
+.dark .palmer-form-buttons .palmer-btn-secondary:hover {
+  background: var(--border-dark);
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+  .palmer-modal {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+  
+  .palmer-modal-header,
+  .palmer-part-form {
+    padding: 1.5rem;
+  }
+  
+  .palmer-form-buttons {
+    flex-direction: column;
+  }
+  
+  .palmer-form-buttons button {
+    width: 100%;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app {
