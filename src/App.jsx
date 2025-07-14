@@ -221,6 +221,14 @@ function CorporateWarehouse() {
     contactMethod: 'email'
   })
   const [submittedRequests, setSubmittedRequests] = useState([])
+  const [showAddPartForm, setShowAddPartForm] = useState(false)
+  const [newPartData, setNewPartData] = useState({
+    partNumber: '',
+    description: '',
+    quantity: ''
+  })
+  const [branchOrders, setBranchOrders] = useState({})
+  const [newlyAddedParts, setNewlyAddedParts] = useState(new Set())
 
   // Sample branch data with weekly orders
   const branches = [
@@ -298,6 +306,13 @@ function CorporateWarehouse() {
   }
 
   const handleBranchSelect = (branch) => {
+    // Initialize branch orders if not already done
+    if (!branchOrders[branch.id]) {
+      setBranchOrders(prev => ({
+        ...prev,
+        [branch.id]: [...branch.orders]
+      }))
+    }
     setSelectedBranch(branch)
     setCurrentView('branch-orders')
   }
@@ -305,6 +320,59 @@ function CorporateWarehouse() {
   const handleBackToDashboard = () => {
     setCurrentView('dashboard')
     setSelectedBranch(null)
+    setShowAddPartForm(false)
+  }
+
+  const handleAddPartSubmit = (e) => {
+    e.preventDefault()
+    if (!newPartData.partNumber || !newPartData.description || !newPartData.quantity) {
+      alert('Please fill in all fields')
+      return
+    }
+
+    const newPart = {
+      partNumber: newPartData.partNumber.toUpperCase(),
+      description: newPartData.description,
+      quantity: parseInt(newPartData.quantity),
+      isNewlyAdded: true,
+      addedAt: Date.now()
+    }
+
+    // Add to branch orders
+    setBranchOrders(prev => ({
+      ...prev,
+      [selectedBranch.id]: [...(prev[selectedBranch.id] || selectedBranch.orders), newPart]
+    }))
+
+    // Track newly added part
+    const partId = `${selectedBranch.id}-${newPart.partNumber}-${newPart.addedAt}`
+    setNewlyAddedParts(prev => new Set([...prev, partId]))
+
+    // Remove the "new" status after 5 seconds
+    setTimeout(() => {
+      setNewlyAddedParts(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(partId)
+        return newSet
+      })
+    }, 5000)
+
+    // Reset form and close
+    setNewPartData({ partNumber: '', description: '', quantity: '' })
+    setShowAddPartForm(false)
+    alert(`Part ${newPart.partNumber} added successfully!`)
+  }
+
+  const handleNewPartChange = (e) => {
+    setNewPartData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+  }
+
+  const getCurrentBranchOrders = () => {
+    if (!selectedBranch) return []
+    return branchOrders[selectedBranch.id] || selectedBranch.orders
   }
 
   const calculateTotalParts = (orders) => {
@@ -468,11 +536,74 @@ function CorporateWarehouse() {
               <h2>{selectedBranch.poNumber}</h2>
               <div className="order-meta">
                 <span>Order Date: {selectedBranch.orderDate}</span>
-                <span>Total Line Items: {selectedBranch.orders.length}</span>
-                <span>Total Parts: {calculateTotalParts(selectedBranch.orders)}</span>
+                <span>Total Line Items: {getCurrentBranchOrders().length}</span>
+                <span>Total Parts: {calculateTotalParts(getCurrentBranchOrders())}</span>
               </div>
             </div>
+            <button 
+              className="add-part-btn"
+              onClick={() => setShowAddPartForm(true)}
+            >
+              + Add New Part
+            </button>
           </div>
+
+          {showAddPartForm && (
+            <div className="add-part-form-container">
+              <form onSubmit={handleAddPartSubmit} className="add-part-form">
+                <h3>Add New Part to Order</h3>
+                <div className="form-row">
+                  <div className="palmer-form-group">
+                    <label htmlFor="partNumber">Part Number *</label>
+                    <input
+                      type="text"
+                      id="partNumber"
+                      name="partNumber"
+                      value={newPartData.partNumber}
+                      onChange={handleNewPartChange}
+                      placeholder="e.g., K180-1234"
+                      required
+                    />
+                  </div>
+                  <div className="palmer-form-group">
+                    <label htmlFor="description">Description *</label>
+                    <input
+                      type="text"
+                      id="description"
+                      name="description"
+                      value={newPartData.description}
+                      onChange={handleNewPartChange}
+                      placeholder="e.g., Air Filter Element"
+                      required
+                    />
+                  </div>
+                  <div className="palmer-form-group">
+                    <label htmlFor="quantity">Quantity *</label>
+                    <input
+                      type="number"
+                      id="quantity"
+                      name="quantity"
+                      value={newPartData.quantity}
+                      onChange={handleNewPartChange}
+                      min="1"
+                      placeholder="1"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-buttons">
+                  <button type="submit" className="submit-part-btn">Add Part</button>
+                  <button 
+                    type="button" 
+                    className="cancel-btn"
+                    onClick={() => setShowAddPartForm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
           
           <div className="parts-table-container">
             <table className="parts-table">
@@ -484,13 +615,18 @@ function CorporateWarehouse() {
                 </tr>
               </thead>
               <tbody>
-                {selectedBranch.orders.map((order, index) => (
-                  <tr key={index}>
-                    <td className="part-number">{order.partNumber}</td>
-                    <td className="part-description">{order.description}</td>
-                    <td className="part-quantity">{order.quantity}</td>
-                  </tr>
-                ))}
+                {getCurrentBranchOrders().map((order, index) => {
+                  const partId = order.addedAt ? `${selectedBranch.id}-${order.partNumber}-${order.addedAt}` : null
+                  const isNewlyAdded = partId && newlyAddedParts.has(partId)
+                  
+                  return (
+                    <tr key={index} className={isNewlyAdded ? 'newly-added-part' : ''}>
+                      <td className="part-number">{order.partNumber}</td>
+                      <td className="part-description">{order.description}</td>
+                      <td className="part-quantity">{order.quantity}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
